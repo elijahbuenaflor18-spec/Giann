@@ -1,0 +1,626 @@
+/* =====================================================================
+   Vyzee premium chrome — control bar, overview, boot, cursor, spine,
+   vignette, grain, sweep, present mode, cinematic slide entrance.
+   Ported verbatim from the Justin recruitment deck so the experience
+   matches exactly. Slide content is untouched; this is pure chrome.
+   ===================================================================== */
+
+/* Reserve a strip at the bottom so the nav never overlaps the slide.
+   Overrides deck-stage's :host { inset:0 } — outer document rules win. */
+deck-stage { bottom: 120px !important; }
+html, body { background: #000; }
+
+/* ---------------------------------------------------------------------
+   CONTROL BAR
+   --------------------------------------------------------------------- */
+.vz-nav {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 120px;
+  z-index: 2147483000;
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  padding: 0 36px;
+  background: #060606;
+  border-top: 1px solid rgba(247, 247, 247, 0.10);
+  font-family: "JetBrains Mono", ui-monospace, monospace;
+  opacity: 0;
+  animation: vzNavIn 0.6s cubic-bezier(0.22, 1, 0.36, 1) 0.2s forwards;
+}
+@keyframes vzNavIn {
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.vz-zone { display: flex; align-items: center; min-width: 0; }
+.vz-left { gap: 18px; }
+.vz-center { justify-content: center; }
+.vz-right { justify-content: flex-end; gap: 14px; }
+
+/* LEFT — brand + section */
+.vz-wordmark {
+  font-family: "Archivo Black", sans-serif;
+  font-size: 24px;
+  letter-spacing: -0.04em;
+  text-transform: uppercase;
+  transform: skewX(-8deg);
+  color: #F7F7F7;
+  display: inline-flex;
+  align-items: flex-start;
+  line-height: 1;
+}
+.vz-wordmark i { font-style: normal; font-size: 10px; color: #CCFF00; margin-left: 2px; }
+.vz-vdiv { width: 1px; height: 34px; background: rgba(247,247,247,0.16); }
+.vz-section { display: flex; align-items: baseline; gap: 10px; min-width: 0; }
+.vz-section b {
+  font-size: 16px; font-weight: 700; color: #CCFF00; letter-spacing: 0.04em; flex-shrink: 0;
+}
+.vz-section span {
+  font-size: 15px; letter-spacing: 0.1em; text-transform: uppercase;
+  color: rgba(247,247,247,0.6);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+
+/* CENTER — cluster */
+.vz-cluster {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  padding: 12px 18px;
+  border-radius: 999px;
+  background: rgba(20, 20, 20, 0.72);
+  border: 1px solid rgba(247, 247, 247, 0.12);
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(247, 247, 247, 0.06);
+}
+.vz-btn {
+  -webkit-appearance: none; appearance: none;
+  width: 54px; height: 54px;
+  border-radius: 50%;
+  border: 1px solid rgba(247, 247, 247, 0.16);
+  background: linear-gradient(160deg, rgba(36, 36, 36, 0.9), rgba(11, 11, 11, 0.9));
+  color: #F7F7F7;
+  display: grid; place-items: center;
+  cursor: pointer; position: relative; overflow: hidden;
+  transition: transform 0.28s cubic-bezier(0.22, 1, 0.36, 1), border-color 0.28s ease, box-shadow 0.28s ease, color 0.28s ease;
+}
+.vz-btn svg { width: 22px; height: 22px; position: relative; z-index: 1; transition: transform 0.28s cubic-bezier(0.22, 1, 0.36, 1); }
+.vz-btn::before {
+  content: ""; position: absolute; inset: 0; border-radius: 50%;
+  background: radial-gradient(circle at 50% 50%, rgba(204, 255, 0, 0.95), rgba(204, 255, 0, 0) 70%);
+  opacity: 0; transform: scale(0.4);
+  transition: opacity 0.32s ease, transform 0.32s ease;
+}
+.vz-btn:hover {
+  border-color: rgba(204, 255, 0, 0.55); color: #0B0B0B;
+  box-shadow: 0 0 0 1px rgba(204, 255, 0, 0.3), 0 10px 30px rgba(204, 255, 0, 0.22);
+  transform: translateY(-2px);
+}
+.vz-btn:hover::before { opacity: 1; transform: scale(1.1); }
+.vz-btn:active { transform: translateY(0) scale(0.94); }
+.vz-btn#vzPrev:hover svg { transform: translateX(-3px); }
+.vz-btn#vzNext:hover svg { transform: translateX(3px); }
+.vz-btn[disabled] { opacity: 0.28; pointer-events: none; box-shadow: none; }
+
+.vz-readout { display: flex; flex-direction: column; gap: 8px; min-width: 120px; padding: 0 4px; }
+.vz-count {
+  display: flex; align-items: baseline; justify-content: center; gap: 6px;
+  font-size: 18px; font-weight: 700; letter-spacing: 0.08em; color: #F7F7F7;
+}
+.vz-count #vzCur { color: #CCFF00; }
+.vz-count .vz-slash { color: rgba(247, 247, 247, 0.4); }
+.vz-count #vzTot { color: rgba(247, 247, 247, 0.6); }
+.vz-track { height: 4px; border-radius: 999px; background: rgba(247, 247, 247, 0.14); overflow: hidden; }
+.vz-fill {
+  height: 100%; width: 7.14%; border-radius: 999px;
+  background: linear-gradient(90deg, #CCFF00, #0066FF);
+  box-shadow: 0 0 12px rgba(204, 255, 0, 0.6);
+  transition: width 0.5s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+/* RIGHT — tick jumper */
+.vz-ticks { display: flex; align-items: center; gap: 5px; padding-right: 6px; }
+.vz-tick {
+  -webkit-appearance: none; appearance: none; border: 0; padding: 0; cursor: pointer;
+  width: 4px; height: 18px; border-radius: 999px;
+  background: rgba(247, 247, 247, 0.2);
+  transition: background 0.3s ease, height 0.3s cubic-bezier(0.22,1,0.36,1), box-shadow 0.3s ease, transform 0.2s ease;
+}
+.vz-tick:hover { background: rgba(247,247,247,0.55); transform: scaleY(1.15); }
+.vz-tick.is-past { background: rgba(204, 255, 0, 0.45); }
+.vz-tick.is-current {
+  height: 26px; width: 5px;
+  background: #CCFF00;
+  box-shadow: 0 0 10px rgba(204, 255, 0, 0.8);
+}
+
+.vz-icon {
+  -webkit-appearance: none; appearance: none;
+  width: 48px; height: 48px; border-radius: 14px;
+  border: 1px solid rgba(247, 247, 247, 0.14);
+  background: rgba(20, 20, 20, 0.7);
+  color: rgba(247, 247, 247, 0.82);
+  display: grid; place-items: center; cursor: pointer; position: relative;
+  transition: transform 0.24s cubic-bezier(0.22,1,0.36,1), border-color 0.24s ease, color 0.24s ease, background 0.24s ease, box-shadow 0.24s ease;
+}
+.vz-icon svg { width: 21px; height: 21px; }
+.vz-icon:hover {
+  border-color: rgba(204, 255, 0, 0.55);
+  color: #CCFF00;
+  background: rgba(204,255,0,0.06);
+  box-shadow: 0 8px 24px rgba(0,0,0,0.4);
+  transform: translateY(-2px);
+}
+.vz-icon:active { transform: translateY(0) scale(0.95); }
+.vz-icon.is-on { border-color: rgba(204,255,0,0.7); color: #0B0B0B; background: #CCFF00; }
+.vz-fs-exit { display: none; }
+.vz-icon.is-fs .vz-fs-enter { display: none; }
+.vz-icon.is-fs .vz-fs-exit { display: block; }
+
+/* Play / sound icon state */
+.vz-play-off, .vz-snd-on { display: none; }
+.vz-icon.is-playing .vz-play-on { display: none; }
+.vz-icon.is-playing .vz-play-off { display: block; }
+.vz-icon.is-on .vz-snd-off { display: none; }
+.vz-icon.is-on .vz-snd-on { display: block; }
+@media (max-width: 1180px) { #vzPlay, #vzPresent, #vzSound { display: none; } }
+
+/* Hide left/right zones on narrow screens; keep the cluster usable */
+@media (max-width: 900px) {
+  .vz-left, .vz-ticks { display: none; }
+}
+
+/* ---------------------------------------------------------------------
+   OVERVIEW OVERLAY
+   --------------------------------------------------------------------- */
+.vz-ov {
+  position: fixed; inset: 0;
+  z-index: 2147483600;
+  background:
+    radial-gradient(circle at 82% 8%, rgba(106,0,255,0.28), transparent 34%),
+    radial-gradient(circle at 8% 92%, rgba(0,102,255,0.18), transparent 30%),
+    rgba(6,6,6,0.96);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  display: flex; flex-direction: column;
+  padding: 48px 56px 56px;
+  opacity: 0; visibility: hidden; transform: scale(1.02);
+  transition: opacity 0.32s ease, transform 0.32s cubic-bezier(0.22,1,0.36,1), visibility 0.32s;
+}
+.vz-ov::before {
+  content: ""; position: absolute; inset: 0; pointer-events: none;
+  background-image:
+    linear-gradient(rgba(247,247,247,0.04) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(247,247,247,0.04) 1px, transparent 1px);
+  background-size: 64px 64px;
+  mask-image: linear-gradient(180deg, rgba(0,0,0,0.6), transparent 70%);
+}
+.vz-ov.is-open { opacity: 1; visibility: visible; transform: scale(1); }
+.vz-ov-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 32px; position: relative; z-index: 1; }
+.vz-ov-title {
+  font-family: "JetBrains Mono", ui-monospace, monospace;
+  font-size: 22px; letter-spacing: 0.14em; text-transform: uppercase; color: #F7F7F7;
+  display: flex; align-items: center; gap: 14px;
+}
+.vz-ov-title em { font-style: normal; color: rgba(247,247,247,0.45); }
+.vz-spark { width: 16px; height: 16px; position: relative; display: inline-block; color: #CCFF00; }
+.vz-spark::before, .vz-spark::after { content: ""; position: absolute; background: currentColor; left: 50%; top: 50%; transform: translate(-50%,-50%); }
+.vz-spark::before { width: 2.5px; height: 16px; }
+.vz-spark::after { width: 16px; height: 2.5px; }
+.vz-ov-close {
+  -webkit-appearance: none; appearance: none;
+  width: 52px; height: 52px; border-radius: 50%;
+  border: 1px solid rgba(247,247,247,0.16); background: rgba(20,20,20,0.7);
+  color: #F7F7F7; display: grid; place-items: center; cursor: pointer;
+  transition: transform 0.24s ease, border-color 0.24s ease, color 0.24s ease, background 0.24s ease;
+}
+.vz-ov-close svg { width: 22px; height: 22px; }
+.vz-ov-close:hover { border-color: #FF2D95; color: #FF2D95; transform: rotate(90deg); }
+.vz-grid {
+  position: relative; z-index: 1;
+  display: grid; grid-template-columns: repeat(5, 1fr); gap: 18px;
+  overflow-y: auto; padding-right: 8px; align-content: start;
+}
+.vz-card {
+  -webkit-appearance: none; appearance: none; text-align: left; cursor: pointer;
+  border: 1px solid rgba(247,247,247,0.12);
+  background: linear-gradient(160deg, rgba(23,23,23,0.9), rgba(11,11,11,0.9));
+  border-radius: 16px; padding: 22px 22px 24px;
+  display: flex; flex-direction: column; gap: 14px; min-height: 132px;
+  position: relative; overflow: hidden;
+  transition: transform 0.26s cubic-bezier(0.22,1,0.36,1), border-color 0.26s ease, box-shadow 0.26s ease;
+}
+.vz-card::before {
+  content: ""; position: absolute; left: 0; top: 0; bottom: 0; width: 4px;
+  background: rgba(247,247,247,0.16); transition: background 0.26s ease;
+}
+.vz-card:hover {
+  transform: translateY(-4px);
+  border-color: rgba(204,255,0,0.5);
+  box-shadow: 0 18px 50px rgba(0,0,0,0.5), 0 0 0 1px rgba(204,255,0,0.2);
+}
+.vz-card:hover::before { background: #CCFF00; }
+.vz-card .vz-card-n { font-family: "JetBrains Mono", monospace; font-size: 15px; letter-spacing: 0.1em; color: rgba(247,247,247,0.45); }
+.vz-card .vz-card-t { font-family: "Archivo Black", sans-serif; font-size: 26px; line-height: 0.96; text-transform: uppercase; letter-spacing: -0.03em; color: #F7F7F7; }
+.vz-card.is-current { border-color: #CCFF00; background: linear-gradient(160deg, rgba(204,255,0,0.14), rgba(11,11,11,0.92)); }
+.vz-card.is-current::before { background: #CCFF00; }
+.vz-card.is-current .vz-card-n { color: #CCFF00; }
+
+@media print { .vz-nav, .vz-ov { display: none !important; } }
+
+/* ---------------------------------------------------------------------
+   FILM GRAIN / SWEEP / TOAST
+   --------------------------------------------------------------------- */
+#vzGrain {
+  position: fixed; inset: 0; pointer-events: none; z-index: 2147481000;
+  opacity: 0.05; mix-blend-mode: overlay;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  animation: vzGrain 0.5s steps(2) infinite;
+}
+@keyframes vzGrain {
+  0% { transform: translate(0,0); } 50% { transform: translate(-4%, 3%); } 100% { transform: translate(2%, -2%); }
+}
+@media print { #vzGrain { display: none; } }
+
+#vzSweep { position: fixed; inset: 0; pointer-events: none; z-index: 2147481500; opacity: 0; overflow: hidden; }
+#vzSweep::before {
+  content: ""; position: absolute; top: 0; bottom: 0; left: 0; width: 160px;
+  transform: translateX(-200px);
+  background: linear-gradient(90deg, transparent, rgba(204,255,0,0.05) 38%, rgba(204,255,0,0.45) 50%, rgba(204,255,0,0.05) 62%, transparent);
+  filter: blur(1px);
+}
+#vzSweep.is-sweep { opacity: 1; }
+#vzSweep.is-sweep::before { animation: vzSweepMove 0.6s cubic-bezier(0.4,0,0.2,1); }
+@keyframes vzSweepMove { from { transform: translateX(-200px); } to { transform: translateX(calc(100vw + 200px)); } }
+@media print { #vzSweep { display: none; } }
+
+#vzToast {
+  position: fixed; left: 50%; bottom: 140px; transform: translateX(-50%) translateY(16px);
+  z-index: 2147483400; padding: 12px 22px; border-radius: 999px;
+  background: rgba(20,20,20,0.85); border: 1px solid rgba(204,255,0,0.4);
+  color: #F7F7F7; font-family: "JetBrains Mono", monospace; font-size: 16px; letter-spacing: 0.06em; text-transform: uppercase;
+  opacity: 0; pointer-events: none; transition: opacity 0.35s ease, transform 0.35s ease;
+}
+#vzToast.is-show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+/* ---------------------------------------------------------------------
+   PRESENT MODE
+   --------------------------------------------------------------------- */
+body.vz-present .vz-nav { transform: translateY(130%); opacity: 0; pointer-events: none; }
+body.vz-present deck-stage { bottom: 0 !important; }
+body.vz-present .runner, body.vz-present .foot { opacity: 0; transition: opacity 0.4s ease; }
+
+/* ---------------------------------------------------------------------
+   CINEMATIC SLIDE ENTRANCE  (adapted to Giann .slide structure)
+   --------------------------------------------------------------------- */
+/* dissolve / blur on every nav path */
+deck-stage > section.vz-enter {
+  animation: vzDissolve 0.55s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+@keyframes vzDissolve {
+  from { opacity: 0; filter: blur(7px) saturate(1.35); transform: scale(0.992); }
+  60%  { opacity: 1; }
+  to   { opacity: 1; filter: none; transform: none; }
+}
+
+/* staggered rise of the direct children: runner → body blocks → foot */
+.vz-enter > * { animation: vzRise 0.62s cubic-bezier(0.22,1,0.36,1) both; }
+.vz-enter > *:nth-child(1) { animation-delay: 0.06s; }
+.vz-enter > *:nth-child(2) { animation-delay: 0.16s; }
+.vz-enter > *:nth-child(3) { animation-delay: 0.26s; }
+.vz-enter > *:nth-child(4) { animation-delay: 0.34s; }
+.vz-enter > *:nth-child(n+5) { animation-delay: 0.42s; }
+@keyframes vzRise { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: none; } }
+
+/* neon "power-on" flicker on accents each slide */
+.vz-enter .neon-t,
+.vz-enter .runner .idx,
+.vz-enter .spark { animation: vzIgnite 0.62s steps(1, end) both 0.08s; }
+@keyframes vzIgnite {
+  0%   { opacity: 0.15; filter: brightness(0.5); }
+  12%  { opacity: 1;    filter: brightness(1.6); }
+  20%  { opacity: 0.35; }
+  30%  { opacity: 1;    filter: brightness(1.4); }
+  46%  { opacity: 0.7; }
+  62%  { opacity: 1;    filter: brightness(1.15); }
+  100% { opacity: 1;    filter: none; }
+}
+
+/* ambient gradient drift on the active slide */
+deck-stage > section[data-deck-active] { animation: vzDrift 17s ease-in-out infinite alternate; }
+@keyframes vzDrift {
+  0%   { background-position: 82% 6%, 10% 92%, 0 0; }
+  100% { background-position: 90% 13%, 3% 85%, 0 0; }
+}
+
+@media print {
+  deck-stage > section.vz-enter, .vz-enter > *,
+  deck-stage > section[data-deck-active] { animation: none !important; }
+}
+
+/* ---------------------------------------------------------------------
+   FILM VIGNETTE
+   --------------------------------------------------------------------- */
+.vz-vignette {
+  position: fixed; inset: 0; pointer-events: none; z-index: 2147481500;
+  background:
+    radial-gradient(130% 110% at 50% 50%, transparent 58%, rgba(0,0,0,0.32) 86%, rgba(0,0,0,0.6) 100%);
+  mix-blend-mode: multiply;
+}
+@media print { .vz-vignette { display: none !important; } }
+
+/* ---------------------------------------------------------------------
+   CUSTOM NEON DOT CURSOR (fine pointer only)
+   --------------------------------------------------------------------- */
+.vz-cursor { display: none; }
+@media (hover: hover) and (pointer: fine) {
+  html.vz-cursor-on, html.vz-cursor-on * { cursor: none !important; }
+  .vz-cursor {
+    display: block; position: fixed; top: 0; left: 0;
+    z-index: 2147483400; pointer-events: none;
+    width: 34px; height: 34px; margin: -17px 0 0 -17px;
+    border: 1.5px solid rgba(204, 255, 0, 0.85);
+    border-radius: 50%;
+    box-shadow: 0 0 14px rgba(204,255,0,0.35), inset 0 0 8px rgba(204,255,0,0.18);
+    transform: translate3d(-100px, -100px, 0) scale(1);
+    transition: width .22s ease, height .22s ease, margin .22s ease,
+                background .22s ease, border-color .22s ease, opacity .25s ease;
+    will-change: transform;
+  }
+  .vz-cursor::after {
+    content: ""; position: absolute; left: 50%; top: 50%;
+    width: 5px; height: 5px; margin: -2.5px 0 0 -2.5px; border-radius: 50%;
+    background: #CCFF00; box-shadow: 0 0 8px rgba(204,255,0,0.9);
+  }
+  .vz-cursor.is-hot {
+    width: 56px; height: 56px; margin: -28px 0 0 -28px;
+    background: rgba(204,255,0,0.10); border-color: rgba(204,255,0,1);
+  }
+  .vz-cursor.is-down { transform: translate3d(var(--cx,0), var(--cy,0), 0) scale(0.82); }
+}
+
+/* ---------------------------------------------------------------------
+   VERTICAL MOVEMENT SPINE (right edge, desktop)
+   --------------------------------------------------------------------- */
+.vz-spine {
+  position: fixed; right: 30px; top: 50%; transform: translateY(-50%);
+  z-index: 2147482000;
+  display: flex; flex-direction: column; align-items: center;
+  width: 22px;
+  opacity: 0; transition: opacity .5s ease .2s;
+}
+body.vz-booted .vz-spine { opacity: 1; }
+.vz-spine-rail {
+  position: absolute; top: 0; bottom: 0; left: 50%; width: 1px; margin-left: -0.5px;
+  background: rgba(247,247,247,0.14);
+}
+.vz-spine-glow {
+  position: absolute; left: 50%; top: 0; width: 2px; margin-left: -1px;
+  background: linear-gradient(180deg, #CCFF00, #0066FF);
+  box-shadow: 0 0 10px rgba(204,255,0,0.6);
+  height: 0; transition: height .5s cubic-bezier(0.22,1,0.36,1);
+  border-radius: 2px;
+}
+.vz-node {
+  -webkit-appearance: none; appearance: none; border: 0; padding: 0; margin: 0;
+  background: transparent; cursor: pointer;
+  position: relative; z-index: 1;
+  width: 22px; height: 26px; display: grid; place-items: center;
+}
+.vz-node i {
+  display: block; width: 6px; height: 6px; border-radius: 50%;
+  background: rgba(247,247,247,0.28);
+  transition: transform .3s cubic-bezier(0.22,1,0.36,1), background .3s ease, box-shadow .3s ease;
+}
+.vz-node:hover i { transform: scale(1.5); background: rgba(247,247,247,0.7); }
+.vz-node.is-past i { background: rgba(204,255,0,0.5); }
+.vz-node.is-current i {
+  transform: scale(1.9); background: #CCFF00;
+  box-shadow: 0 0 12px rgba(204,255,0,0.95);
+}
+.vz-node .vz-node-lbl {
+  position: absolute; right: 28px; top: 50%; transform: translateY(-50%) translateX(6px);
+  white-space: nowrap; font-family: "JetBrains Mono", monospace; font-size: 11px;
+  letter-spacing: 0.14em; text-transform: uppercase; color: rgba(247,247,247,0.82);
+  background: rgba(8,8,8,0.92); border: 1px solid rgba(247,247,247,0.12);
+  padding: 6px 10px; border-radius: 8px; opacity: 0; pointer-events: none;
+  transition: opacity .2s ease, transform .2s ease;
+}
+.vz-node:hover .vz-node-lbl { opacity: 1; transform: translateY(-50%) translateX(0); }
+body.vz-present .vz-spine { opacity: 0 !important; pointer-events: none; }
+@media (max-width: 1100px), (max-height: 620px) { .vz-spine { display: none; } }
+@media print { .vz-spine { display: none !important; } }
+
+/* ---------------------------------------------------------------------
+   CINEMATIC BOOT SEQUENCE
+   --------------------------------------------------------------------- */
+.vz-boot {
+  position: fixed; inset: 0; z-index: 2147483500;
+  display: grid; place-items: center; overflow: hidden;
+  background: radial-gradient(120% 90% at 50% 40%, #0d0d11 0%, #08080a 46%, #040405 100%);
+  transition: opacity 0.8s ease, visibility 0.8s ease;
+}
+.vz-boot.is-gone { opacity: 0; visibility: hidden; pointer-events: none; }
+.vz-boot-grid {
+  position: absolute; inset: -10%;
+  background-image:
+    linear-gradient(rgba(247,247,247,0.045) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(247,247,247,0.045) 1px, transparent 1px);
+  background-size: 64px 64px;
+  -webkit-mask-image: radial-gradient(circle at 50% 44%, #000 0%, transparent 58%);
+  mask-image: radial-gradient(circle at 50% 44%, #000 0%, transparent 58%);
+  opacity: 0; transform: scale(1.08);
+  animation: vzBootGrid 2s cubic-bezier(0.22,1,0.36,1) forwards;
+}
+@keyframes vzBootGrid {
+  0%   { opacity: 0; transform: scale(1.08); }
+  60%  { opacity: 1; }
+  100% { opacity: 0.5; transform: scale(1); }
+}
+.vz-boot-core { position: relative; z-index: 1; text-align: center; padding: 0 40px; }
+.vz-boot-core::before {
+  content: ""; position: absolute; left: 50%; top: 42%;
+  width: 520px; height: 360px; transform: translate(-50%, -50%);
+  background: radial-gradient(circle, rgba(204,255,0,0.09), rgba(0,102,255,0.05) 40%, transparent 70%);
+  filter: blur(26px); pointer-events: none;
+  opacity: 0; animation: vzBootGlow 2s ease forwards 0.3s;
+}
+@keyframes vzBootGlow { to { opacity: 1; } }
+.vz-boot-mark {
+  position: relative;
+  font-family: "Archivo Black", sans-serif; font-size: clamp(46px, 11vw, 104px);
+  letter-spacing: -0.04em; text-transform: uppercase; color: #F7F7F7;
+  display: inline-block; line-height: 1;
+  padding: 0.3em 0.14em 0;
+  opacity: 0; filter: blur(14px);
+  transform: skewX(-8deg) translateY(16px);
+  animation: vzBootMark 1.15s cubic-bezier(0.2, 0.8, 0.2, 1) forwards 0.35s;
+}
+.vz-boot-mark i {
+  font-style: normal; font-size: 0.2em; color: #CCFF00;
+  vertical-align: top; position: relative; top: 0.15em; margin-left: 0.05em;
+}
+@keyframes vzBootMark {
+  0%   { opacity: 0; filter: blur(14px); transform: skewX(-8deg) translateY(16px); }
+  100% { opacity: 1; filter: blur(0);    transform: skewX(-8deg) translateY(0); }
+}
+.vz-boot-bar {
+  position: relative;
+  width: min(220px, 54vw); height: 1px; margin: 42px auto 0;
+  background: rgba(247,247,247,0.12); overflow: hidden;
+}
+.vz-boot-bar span {
+  display: block; height: 100%; width: 0;
+  background: linear-gradient(90deg, rgba(204,255,0,0), #CCFF00);
+  animation: vzBootBar 1.7s cubic-bezier(0.5, 0, 0.1, 1) forwards 0.5s;
+}
+@keyframes vzBootBar { to { width: 100%; } }
+.vz-boot-cap {
+  margin-top: 24px; font-family: "JetBrains Mono", monospace; font-size: 12px;
+  letter-spacing: 0.34em; text-transform: uppercase; color: rgba(247,247,247,0.36);
+  opacity: 0; animation: vzBootCap 0.9s ease forwards 1s;
+}
+@keyframes vzBootCap { to { opacity: 1; } }
+@media print { .vz-boot { display: none !important; } }
+
+/* ---------------------------------------------------------------------
+   REDUCED MOTION
+   --------------------------------------------------------------------- */
+@media (prefers-reduced-motion: reduce) {
+  .vz-boot-grid, .vz-boot-mark, .vz-boot-bar span, .vz-boot-cap,
+  deck-stage > section.vz-enter, .vz-enter > *,
+  .vz-enter .neon-t, .vz-enter .runner .idx, .vz-enter .spark,
+  deck-stage > section[data-deck-active], #vzGrain, #vzSweep.is-sweep::before { animation: none !important; }
+  .vz-boot-mark { opacity: 1; filter: none; transform: skewX(-8deg); }
+  .vz-boot-bar span { width: 100%; }
+  .vz-boot-cap { opacity: 1; }
+}
+
+/* ---------------------------------------------------------------------
+   MOBILE OPTIMIZATION
+   --------------------------------------------------------------------- */
+@media (max-width: 860px), (max-height: 560px) {
+  deck-stage { bottom: 72px !important; }
+  .vz-nav {
+    height: 72px;
+    padding: 0 14px;
+    grid-template-columns: 1fr;
+  }
+  .vz-left, .vz-right { display: none; }
+  .vz-center { justify-content: center; }
+  .vz-cluster {
+    gap: 12px;
+    padding: 8px 14px;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.5), inset 0 1px 0 rgba(247,247,247,0.06);
+  }
+  .vz-btn { width: 50px; height: 50px; }
+  .vz-btn svg { width: 20px; height: 20px; }
+  .vz-readout { min-width: 84px; gap: 6px; }
+  .vz-count { font-size: 16px; }
+  .vz-vignette { background: radial-gradient(140% 120% at 50% 50%, transparent 64%, rgba(0,0,0,0.45) 100%); }
+  .brand-card { transform: none !important; }
+  #vzToast { bottom: 90px; }
+}
+@media (max-height: 430px) {
+  deck-stage { bottom: 64px !important; }
+  .vz-nav { height: 64px; }
+  .vz-btn { width: 46px; height: 46px; }
+}
+
+/* ---------------------------------------------------------------------
+   PORTRAIT ROTATE PROMPT
+   --------------------------------------------------------------------- */
+.vz-rotate {
+  display: none;
+  position: fixed; inset: 0;
+  z-index: 2147483600;
+  flex-direction: column;
+  align-items: center; justify-content: center;
+  text-align: center;
+  padding: 40px;
+  background:
+    radial-gradient(circle at 80% 8%, rgba(106,0,255,.30), transparent 36%),
+    radial-gradient(circle at 12% 92%, rgba(0,102,255,.20), transparent 32%),
+    #060606;
+  color: #F7F7F7;
+  font-family: "JetBrains Mono", ui-monospace, monospace;
+  -webkit-tap-highlight-color: transparent;
+}
+.vz-rotate::before {
+  content: ""; position: absolute; inset: 0; pointer-events: none;
+  background-image:
+    linear-gradient(rgba(247,247,247,.05) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(247,247,247,.05) 1px, transparent 1px);
+  background-size: 48px 48px;
+  mask-image: radial-gradient(circle at 50% 40%, #000, transparent 75%);
+}
+.vz-rotate > * { position: relative; z-index: 1; }
+.vzr-mark {
+  font-family: "Archivo Black", sans-serif;
+  font-size: 26px; letter-spacing: -0.04em; text-transform: uppercase;
+  transform: skewX(-8deg); color: #F7F7F7; margin-bottom: 42px;
+}
+.vzr-mark i { font-style: normal; font-size: 11px; color: #CCFF00; }
+.vzr-phone {
+  width: 58px; height: 104px; border-radius: 12px;
+  border: 2.5px solid rgba(247,247,247,0.85);
+  position: relative;
+  margin-bottom: 36px;
+  animation: vzrTilt 2.6s cubic-bezier(0.65,0,0.35,1) infinite;
+}
+.vzr-phone::before {
+  content: ""; position: absolute; left: 50%; top: 8px; transform: translateX(-50%);
+  width: 16px; height: 3px; border-radius: 2px; background: rgba(247,247,247,0.55);
+}
+.vzr-phone::after {
+  content: ""; position: absolute; left: 50%; bottom: 8px; transform: translateX(-50%);
+  width: 16px; height: 16px; border-radius: 50%; border: 2px solid #CCFF00;
+}
+@keyframes vzrTilt {
+  0%, 18% { transform: rotate(0deg); }
+  50%, 78% { transform: rotate(-90deg); }
+  100% { transform: rotate(0deg); }
+}
+.vzr-title {
+  font-family: "Space Grotesk", sans-serif;
+  font-size: 26px; font-weight: 600; letter-spacing: -0.02em;
+  margin: 0 0 10px;
+}
+.vzr-sub {
+  font-size: 13px; line-height: 1.6; letter-spacing: 0.04em;
+  color: rgba(247,247,247,0.6); max-width: 280px; margin: 0 0 30px;
+}
+.vzr-anyway {
+  -webkit-appearance: none; appearance: none; cursor: pointer;
+  background: transparent; color: #CCFF00;
+  border: 1px solid rgba(204,255,0,0.45); border-radius: 999px;
+  padding: 12px 22px; min-height: 44px;
+  font-family: "JetBrains Mono", ui-monospace, monospace;
+  font-size: 12px; letter-spacing: 0.12em; text-transform: uppercase;
+}
+.vzr-anyway:active { background: rgba(204,255,0,0.10); }
+@media (max-width: 820px) and (orientation: portrait) {
+  body:not(.vz-rotate-dismiss) .vz-rotate { display: flex; }
+}
+@media print { .vz-rotate { display: none !important; } }
