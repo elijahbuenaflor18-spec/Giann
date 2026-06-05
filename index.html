@@ -60,8 +60,11 @@
   }
 
   *{ box-sizing:border-box; }
-  html, body { margin:0; padding:0; background:#000; }
-  deck-stage { font-family: var(--font); }
+  html, body { margin:0; padding:0; background: var(--ink); }
+  /* Letterbox bars (the area around the scaled 16:9 canvas) inherit the slide
+     base tone instead of pure #000, so the deck reads full-bleed on any screen
+     ratio — no visible black frame. !important beats the component's :host. */
+  deck-stage { font-family: var(--font); background: var(--ink) !important; }
   deck-stage section { background: var(--ink); color: var(--cloud); overflow:hidden; }
 
   /* ===== Base slide: flex column so header / body / footer never overlap ===== */
@@ -463,7 +466,22 @@
   .sig-cell .lbl{ font-size:19px; text-transform:uppercase; letter-spacing:0.08em; color:rgba(11,11,11,0.6); font-weight:700; margin-bottom:14px; }
   .sig-cell .v{ font-weight:700; font-size:34px; border-bottom:2px solid rgba(11,11,11,0.4); padding-bottom:16px; min-height:54px; text-transform:uppercase; letter-spacing:-0.03em; }
 </style>
-<style></style><style></style></head>
+<style>
+  /* ---- premium count-up: tabular figures so width never jumps ---- */
+  .cu{ font-variant-numeric: tabular-nums; font-feature-settings:"tnum" 1; }
+
+  /* ---- data-as-texture: 2,000+ clinics as a faint dot constellation ---- */
+  .clinic-field{
+    position:absolute; top:150px; right:104px;
+    width:430px; height:190px; pointer-events:none;
+    background-image: radial-gradient(rgba(204,255,0,0.6) 1.3px, transparent 1.7px);
+    background-size: 16px 16px;
+    -webkit-mask-image: radial-gradient(ellipse 62% 78% at 64% 46%, #000 0%, transparent 72%);
+    mask-image: radial-gradient(ellipse 62% 78% at 64% 46%, #000 0%, transparent 72%);
+    opacity:0.34;
+  }
+  @media print{ .clinic-field{ display:none; } }
+</style><style></style></head>
 <body data-new-gr-c-s-check-loaded="14.1297.0" data-gr-ext-installed="" style="" data-new-gr-c-s-loaded="14.1297.0">
 
 <deck-stage width="1920" height="1080" style="--deck-rail-w: 188px;">
@@ -492,7 +510,7 @@
         <div class="bc-top">
           <div class="bc-word">VYZEE<sup>™</sup></div>
         </div>
-        <div class="bc-num">2<sup>&nbsp; %</sup></div>
+        <div class="bc-num"><span class="cu" data-to="2">2</span><sup>&nbsp; %</sup></div>
         <div class="bc-label" style="">Founding cap-table equity.<div style="">Vested over four years, cliff<div>at year one.</div></div></div>
       </aside>
     </div>
@@ -620,12 +638,12 @@
         <div class="cost-grid">
           <div class="cost-col">
             <div class="what">Financial Cost</div>
-            <div class="big">₱18<small style="">&nbsp;M</small></div>
+            <div class="big">₱<span class="cu" data-to="18">18</span><small style="">&nbsp;M</small></div>
             <div class="desc" style="">New revenue you'd close for someone else's company over three years at a typical Manila agency book.</div>
           </div>
           <div class="cost-col">
             <div class="what">Enterprise Cost</div>
-            <div class="big">₱54<small style="">&nbsp;M</small></div>
+            <div class="big">₱<span class="cu" data-to="54">54</span><small style="">&nbsp;M</small></div>
             <div class="desc">What that same book is worth to the cap table at a 3× ARR multiple — and you'd own none of it.</div>
           </div>
           <div class="cost-col">
@@ -664,11 +682,11 @@
         </div>
         <div class="vision-card">
           <div class="vc-eyebrow" style="">JUNE 2027 · Year One</div>
-          <div class="vc-row"><div class="lbl">Vyzee MRR target</div><div class="val neon-t">₱1.0M</div></div>
-          <div class="vc-row"><div class="lbl">Clients on retainer</div><div class="val">30+</div></div>
-          <div class="vc-row"><div class="lbl">Annualized run-rate</div><div class="val">₱12M</div></div>
-          <div class="vc-row"><div class="lbl">Your stake, vested year one</div><div class="val neon-t">0.5%</div></div>
-          <div class="vc-row"><div class="lbl">Stake value, at 3× ARR</div><div class="val neon-t">₱180k+</div></div>
+          <div class="vc-row"><div class="lbl">Vyzee MRR target</div><div class="val neon-t">₱<span class="cu" data-to="1" data-dp="1">1.0</span>M</div></div>
+          <div class="vc-row"><div class="lbl">Clients on retainer</div><div class="val"><span class="cu" data-to="30">30</span>+</div></div>
+          <div class="vc-row"><div class="lbl">Annualized run-rate</div><div class="val">₱<span class="cu" data-to="12">12</span>M</div></div>
+          <div class="vc-row"><div class="lbl">Your stake, vested year one</div><div class="val neon-t"><span class="cu" data-to="0.5" data-dp="1">0.5</span>%</div></div>
+          <div class="vc-row"><div class="lbl">Stake value, at 3× ARR</div><div class="val neon-t">₱<span class="cu" data-to="180">180</span>k+</div></div>
         </div>
       </div>
     </div>
@@ -691,6 +709,7 @@
     </header>
 
     <div class="vyzee-body">
+      <div class="clinic-field" aria-hidden="true" style="z-index:0;"></div>
       <p class="eyebrow"><span class="spark"></span>The company you're invited into</p>
       <div class="vyzee-word">VY<span class="neon-t">ZEE</span><sup>™</sup></div>
       <div class="vyzee-tag" style="">The AI-first growth agency for Metro Manila businesses — <span class="neon-t">guaranteed 30% inquiry-to-booking conversion in 90 days, or we work free until we hit it.</span></div>
@@ -813,10 +832,10 @@
               <text x="66" y="455" text-anchor="end">₱0</text>
             </g>
 
-            <path d="M 110 435 L 170 418 L 230 388 L 290 346 L 350 300 L 410 250 L 470 205 L 530 165 L 590 135 L 650 105 L 710 88 L 770 72 L 770 450 L 110 450 Z" fill="url(#areaGrad)"></path>
-            <path d="M 110 435 L 170 418 L 230 388 L 290 346 L 350 300 L 410 250 L 470 205 L 530 165 L 590 135 L 650 105 L 710 88 L 770 72" fill="none" stroke="#CCFF00" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"></path>
+            <path id="vzTrajArea" d="M 110 435 L 170 418 L 230 388 L 290 346 L 350 300 L 410 250 L 470 205 L 530 165 L 590 135 L 650 105 L 710 88 L 770 72 L 770 450 L 110 450 Z" fill="url(#areaGrad)"></path>
+            <path id="vzTrajLine" d="M 110 435 L 170 418 L 230 388 L 290 346 L 350 300 L 410 250 L 470 205 L 530 165 L 590 135 L 650 105 L 710 88 L 770 72" fill="none" stroke="#CCFF00" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"></path>
 
-            <g>
+            <g id="vzTrajDots">
               <circle cx="110" cy="435" r="6" fill="#F7F7F7"></circle>
               <circle cx="290" cy="346" r="6" fill="#F7F7F7"></circle>
               <circle cx="470" cy="205" r="6" fill="#0066FF" stroke="#F7F7F7" stroke-width="2"></circle>
@@ -839,7 +858,7 @@
               <text x="650" y="90" text-anchor="middle">₱550–700k</text>
             </g>
 
-            <g font-family="Space Grotesk, sans-serif">
+            <g id="vzTrajCap" font-family="Space Grotesk, sans-serif">
               <text x="765" y="44" text-anchor="end" font-size="26" font-weight="700" fill="#CCFF00">₱1.0M MRR</text>
               <text x="765" y="22" text-anchor="end" font-size="15" font-weight="700" letter-spacing="2" fill="rgba(247,247,247,0.55)">MONTH 12 TARGET</text>
             </g>
@@ -854,12 +873,12 @@
           </div>
           <div class="chart-stat">
             <div class="lbl">Clinic addressable market</div>
-            <div class="val">2,500<span class="blue-t">+</span></div>
+            <div class="val"><span class="cu" data-to="2500" data-sep="1">2,500</span><span class="blue-t">+</span></div>
             <div class="desc">Dental clinics + medspas in Metro Manila alone. Phase 2: Cebu, Davao.</div>
           </div>
           <div class="chart-stat">
             <div class="lbl">Path to ₱1M MRR</div>
-            <div class="val">30<span class="neon-t"> closes</span></div>
+            <div class="val"><span class="cu" data-to="30">30</span><span class="neon-t"> closes</span></div>
             <div class="desc">Not a miracle. Three closes a month, sustained. That's the job.</div>
           </div>
         </div>
@@ -935,7 +954,7 @@
           <h2>Your stake<br>in <span class="neon-t">Vyzee.</span></h2>
           <div class="offer-anchor">
             <div class="lbl">Cost of saying no</div>
-            <div class="val">₱54M+</div>
+            <div class="val">₱<span class="cu" data-to="54">54</span>M+</div>
             <div class="desc">Enterprise value of three years closing for someone else's cap table.</div>
           </div>
           <div class="anchor-note" style="">That number is the anchor. Now look at what's on the table and ask whether the offer looks expensive, or like the best trade you'll make this decade.</div>
@@ -944,19 +963,19 @@
         <div class="offer-right">
           <div class="offer-line">
             <div><div class="ol-h">Founding Equity</div><div class="ol-sub">Senior Sales Associate · founding cap-table seat</div></div>
-            <div class="ol-v">2%</div>
+            <div class="ol-v"><span class="cu" data-to="2">2</span>%</div>
           </div>
           <div class="offer-line">
             <div><div class="ol-h">Vesting Schedule</div><div class="ol-sub">4-year vest · 1-year cliff · monthly thereafter</div></div>
-            <div class="ol-v">48mo</div>
+            <div class="ol-v"><span class="cu" data-to="48">48</span>mo</div>
           </div>
           <div class="offer-line">
             <div><div class="ol-h">Sales Commission</div><div class="ol-sub">On every peso of new MRR you personally close</div></div>
-            <div class="ol-v">15%</div>
+            <div class="ol-v"><span class="cu" data-to="15">15</span>%</div>
           </div>
           <div class="offer-line">
             <div><div class="ol-h">Founder Draw Eligibility</div><div class="ol-sub">Activates at ₱100k MRR · distributed by contribution</div></div>
-            <div class="ol-v">25%</div>
+            <div class="ol-v"><span class="cu" data-to="25">25</span>%</div>
           </div>
           <div class="offer-line">
             <div><div class="ol-h">Decision Window</div><div class="ol-sub">Cap table closes this month · cliff begins on sign date</div></div>
@@ -1054,7 +1073,7 @@
             <div class="s-when" style="">BY NEXT NEXT WEEK ONWARDS</div>
             <div class="s-n">03</div>
             <div class="s-h">Inherit the pipeline. Close.</div>
-            <div class="s-b" style="">Day one: 50 contacted leads, productized SKUs, vertical tracking, and demos.</div>
+            <div class="s-b" style="">Day one: 15 contacted leads, productized SKUs, vertical tracking, and demos.</div>
           </div>
         </div>
 
@@ -1099,11 +1118,7 @@
 <div class="vz-vignette" id="vzVignette" aria-hidden="true"></div>
 <div class="vz-cursor" id="vzCursor" aria-hidden="true"></div>
 
-<!-- vertical movement spine (desktop) -->
-<nav class="vz-spine" id="vzSpine" aria-label="Progress">
-  <span class="vz-spine-rail"></span>
-  <span class="vz-spine-glow" id="vzSpineGlow"></span>
-</nav>
+
 
 <!-- cinematic boot sequence -->
 <div class="vz-boot" id="vzBoot" role="status" aria-label="Loading">
@@ -1192,6 +1207,7 @@
 <script src="deck-stage.js"></script>
 <script src="vz-ui.js"></script>
 <script src="vz-fx.js"></script>
+<script src="vz-premium.js"></script>
 
 
 
